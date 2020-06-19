@@ -1,0 +1,22 @@
+setup:
+  addons:
+    - plan: heroku-redis
+      as: REDIS
+    - plan: heroku-postgresql:hobby-dev
+      as: DATABASE_URL
+build:
+  docker:
+    web: ./Dockerfile
+    # worker: ./Dockerfile
+run:
+  web: gunicorn -b 0.0.0.0:${PORT} app:app --worker-class gevent --preload --timeout 300
+  worker:
+    image: web
+    command: 
+      - celery -A app.celery worker -O fair --loglevel=info
+
+# ${PORT} is the Heroku-specified port. Can't be manually set, so make sure to read it for Flask, too.
+# heroku-postgresql creates db as DATABASE_URL by default
+
+# After deployment, must scale workers:
+# heroku scale worker=1 --app yp-scraper

@@ -1,0 +1,4 @@
+*.user
+build-*/
+docs/Relazio*
+.directory
